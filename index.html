@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Finance Dashboard - لوحة الميزانية الشخصية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-blue: #3b82f6;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px 10px;
+      min-height: 100vh;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .dashboard-header h1 span {
+      color: var(--accent-blue);
+    }
+
+    .dashboard-header p {
+      color: var(--text-sub);
+      font-size: 16px;
+      margin-top: 5px;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    /* كروت الإحصائيات */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 22px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    .card-amount {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .amount-income { color: var(--accent-green); }
+    .amount-expense { color: var(--accent-red); }
+    .amount-balance { color: var(--accent-blue); }
+
+    /* القسم الأوسط: النموذج والرسم البياني */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    /* إدخال البيانات */
+    .form-box, .chart-box, .history-box {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .box-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    .submit-btn:hover {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* الرسم البياني */
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #expenseChart {
+      max-width: 250px;
+      max-height: 250px;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* جدول المعاملات */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .history-table th, .history-table td {
+      padding: 12px 15px;
+      text-align: right;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+    }
+
+    .history-table th {
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .delete-btn {
+      background: transparent;
+      color: var(--accent-red);
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    
+    <!-- الهيدر -->
+    <header class="dashboard-header">
+      <h1>Personal <span>Finance Dashboard</span> 💵</h1>
+      <p>تتبع مصاريفك ودخلك اليومي وحلل ميزانيتك بسهولة</p>
+    </header>
+
+    <!-- الإحصائيات السريعة -->
+    <section class="summary-cards">
+      <div class="card">
+        <span class="card-title">إجمالي الدخل (Income)</span>
+        <span class="card-amount amount-income" id="total-income">0.00 ج.م</span>
+      </div>
+      <div class="card">
+        <span class="card-title">إجمالي المصاريف (Expenses)</span>
+        <span class="card-amount amount-expense" id="total-expenses">0.00 ج.م</span>
+      </div>
+      <div class="card">
+        <span class="card-title">المتبقي (Net Balance)</span>
+        <span class="card-amount amount-balance" id="net-balance">0.00 ج.م</span>
+      </div>
+    </section>
+
+    <!-- المحتوى الأوسط (إضافة + رسم بياني) -->
+    <div class="content-grid">
+      
+      <!-- نموذج إضافة المعاملة -->
+      <section class="form-box">
+        <h2 class="box-title">إضافة معاملة جديدة ➕</h2>
+        <form id="transaction-form">
+          <div class="form-group">
+            <label>نوع المعاملة</label>
+            <select id="type" class="form-control" onchange="updateCategories()">
+              <option value="expense">مصروف (Expense)</option>
+              <option value="income">دخل (Income)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>المبلغ (ج.م)</label>
+            <input type="number" id="amount" class="form-control" placeholder="مثال: 250" required min="1">
+          </div>
+
+          <div class="form-group">
+            <label>التصنيف (Category)</label>
+            <select id="category" class="form-control">
+              <!-- سيتغير ديناميكياً بواسطة JS -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>الوصف / البيان</label>
+            <input type="text" id="description" class="form-control" placeholder="مثال: غداء، بنزين، راتب..." required>
+          </div>
+
+          <button type="submit" class="submit-btn">حفظ المعاملة 💾</button>
+        </form>
+      </section>
+
+      <!-- الرسم البياني توزيع المصاريف -->
+      <section class="chart-box">
+        <h2 class="box-title">توزيع المصاريف حسب الأقسام 📊</h2>
+        <div class="chart-container">
+          <canvas id="expenseChart" width="220" height="220"></canvas>
+          <div class="chart-legend" id="chart-legend"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- سجل المعاملات -->
+    <section class="history-box">
+      <h2 class="box-title">سجل المعاملات اليومية 📋</h2>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>البيان</th>
+            <th>التصنيف</th>
+            <th>النوع</th>
+            <th>المبلغ</th>
+            <th>حذف</th>
+          </tr>
+        </thead>
+        <tbody id="transaction-list">
+          <!-- المعاملات ستضاف هنا -->
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <script>
+    // الألوان المخصصة للأقسام
+    const categoryColors = {
+      'سكن وفواتير': '#f59e0b',
+      'طعام ومشروبات': '#ef4444',
+      'مواصلات وسيارات': '#3b82f6',
+      'ترفيه وتسوق': '#ec4899',
+      'تعليم ودراسة': '#8b5cf6',
+      'صحة وطوارئ': '#06b6d4',
+      'مرتب/دخل ثابت': '#10b981',
+      'عمل حر/مشاريع': '#14b8a6',
+      'أخرى': '#64748b'
+    };
+
+    const expenseCategories = ['طعام ومشروبات', 'مواصلات وسيارات', 'سكن وفواتير', 'ترفيه وتسوق', 'تعليم ودراسة', 'صحة وطوارئ', 'أخرى'];
+    const incomeCategories = ['مرتب/دخل ثابت', 'عمل حر/مشاريع', 'أخرى'];
+
+    let transactions = [
+      { id: 1, type: 'income', amount: 8000, category: 'مرتب/دخل ثابت', description: 'راتب الشهر' },
+      { id: 2, type: 'expense', amount: 1200, category: 'طعام ومشروبات', description: 'سوبرماركت وغداء' },
+      { id: 3, type: 'expense', amount: 500, category: 'مواصلات وسيارات', description: 'بنزين وكارتة' },
+      { id: 4, type: 'expense', amount: 1500, category: 'سكن وفواتير', description: 'فاتورة الكهرباء والنت' }
+    ];
+
+    function updateCategories() {
+      const type = document.getElementById('type').value;
+      const categorySelect = document.getElementById('category');
+      categorySelect.innerHTML = '';
+      
+      const list = type === 'expense' ? expenseCategories : incomeCategories;
+      list.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.innerText = cat;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    // إضافة معاملة جديدة
+    document.getElementById('transaction-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const type = document.getElementById('type').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const category = document.getElementById('category').value;
+      const description = document.getElementById('description').value;
+
+      const newTransaction = {
+        id: Date.now(),
+        type,
+        amount,
+        category,
+        description
+      };
+
+      transactions.push(newTransaction);
+      this.reset();
+      updateCategories();
+      renderApp();
+    });
+
+    // حذف معاملة
+    function deleteTransaction(id) {
+      transactions = transactions.filter(t => t.id !== id);
+      renderApp();
+    }
+
+    // تحديث الواجهة الكاملة
+    function renderApp() {
+      let incomeTotal = 0;
+      let expenseTotal = 0;
+      const historyList = document.getElementById('transaction-list');
+      historyList.innerHTML = '';
+
+      const categorySums = {};
+
+      transactions.forEach(t => {
+        if(t.type === 'income') {
+          incomeTotal += t.amount;
+        } else {
+          expenseTotal += t.amount;
+          categorySums[t.category] = (categorySums[t.category] || 0) + t.amount;
+        }
+
+        // إدراج الجدول
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${t.description}</strong></td>
+          <td>${t.category}</td>
+          <td style="color:${t.type === 'income' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+            ${t.type === 'income' ? 'دخل 🟢' : 'مصروف 🔴'}
+          </td>
+          <td><strong>${t.amount.toLocaleString()} ج.م</strong></td>
+          <td><button class="delete-btn" onclick="deleteTransaction(${t.id})">🗑️</button></td>
+        `;
+        historyList.appendChild(row);
+      });
+
+      // تحديث الأرقام الرئيسية
+      document.getElementById('total-income').innerText = incomeTotal.toLocaleString() + ' ج.م';
+      document.getElementById('total-expenses').innerText = expenseTotal.toLocaleString() + ' ج.م';
+      
+      const netBalance = incomeTotal - expenseTotal;
+      const netEl = document.getElementById('net-balance');
+      netEl.innerText = netBalance.toLocaleString() + ' ج.م';
+      netEl.style.color = netBalance >= 0 ? 'var(--accent-blue)' : 'var(--accent-red)';
+
+      // رسم البياني للمصاريف
+      drawPieChart(categorySums, expenseTotal);
+    }
+
+    // رسم Pie Chart باستخدام HTML Canvas
+    function drawPieChart(categorySums, totalExpense) {
+      const canvas = document.getElementById('expenseChart');
+      const ctx = canvas.getContext('2d');
+      const legend = document.getElementById('chart-legend');
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      legend.innerHTML = '';
+
+      if (totalExpense === 0 || Object.keys(categorySums).length === 0) {
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        ctx.arc(110, 110, 90, 0, Math.PI * 2);
+        ctx.fill();
+        legend.innerHTML = '<span style="color:var(--text-sub)">لا يوجد مصاريف مسجلة حتى الآن</span>';
+        return;
+      }
+
+      let startAngle = 0;
+
+      for (const [cat, sum] of Object.entries(categorySums)) {
+        const sliceAngle = (sum / totalExpense) * 2 * Math.PI;
+        const color = categoryColors[cat] || '#64748b';
+
+        // رسم الشريحة
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(110, 110);
+        ctx.arc(110, 110, 90, startAngle, startAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fill();
+
+        startAngle += sliceAngle;
+
+        // إضافة الدليل (Legend)
+        const percent = ((sum / totalExpense) * 100).toFixed(1);
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `
+          <div class="legend-color" style="background:${color}"></div>
+          <span>${cat} (${percent}%)</span>
+        `;
+        legend.appendChild(legendItem);
+      }
+    }
+
+    // بدء التشغيل الأول
+    updateCategories();
+    renderApp();
+  </script>
+</body>
+</html>
